@@ -13,7 +13,12 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   MessageFlags,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
 } = require('discord.js');
+
 const Database = require('better-sqlite3');
 
 const client = new Client({
@@ -77,14 +82,14 @@ const commands = [
   new SlashCommandBuilder()
     .setName('confess')
     .setDescription('Send an anonymous confession')
-    .addStringOption((opt) =>
-      opt
-        .setName('message')
-        .setDescription('Your confession (no one will know it was you)')
-        .setRequired(true)
-        .setMinLength(1)
-        .setMaxLength(1000)
-    )
+    // .addStringOption((opt) =>
+    //   opt
+    //     .setName('message')
+    //     .setDescription('Your confession (no one will know it was you)')
+    //     .setRequired(true)
+    //     .setMinLength(1)
+    //     .setMaxLength(1000)
+    // )
     .toJSON(),
 ];
 
@@ -111,10 +116,10 @@ client.once('clientReady', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand() && !interaction.isModalSubmit()) return;
 
   // ── /setup ───────────────────────────────────────────────────────────────
-  if (interaction.commandName === 'setup') {
+  if (interaction.isChatInputCommand() && interaction.commandName === 'setup') {
     const channel = interaction.options.getChannel('channel');
     const guildId = interaction.guildId;
 
@@ -150,8 +155,8 @@ client.on('interactionCreate', async (interaction) => {
     });
   }
 
-  // ── /confess ─────────────────────────────────────────────────────────────
-  if (interaction.commandName === 'confess') {
+  // ── /confess — show the modal ─────────────────────────────────────────────
+  if (interaction.isChatInputCommand() && interaction.commandName === 'confess') {
     const guildId = interaction.guildId;
     const settings = getSettings(guildId);
 
@@ -162,7 +167,29 @@ client.on('interactionCreate', async (interaction) => {
       });
     }
 
-    const confessionText = interaction.options.getString('message');
+    const modal = new ModalBuilder()
+      .setCustomId('confess_modal')
+      .setTitle('Anonymous Confession');
+
+    const confessionInput = new TextInputBuilder()
+      .setCustomId('confession_text')
+      .setLabel('Your confession')
+      .setPlaceholder('Write your confession here...')
+      .setStyle(TextInputStyle.Paragraph)  // 👈 multi-line input
+      .setMinLength(1)
+      .setMaxLength(1000)
+      .setRequired(true);
+
+    modal.addComponents(new ActionRowBuilder().addComponents(confessionInput));
+
+    return interaction.showModal(modal);
+  }
+
+  // ── Modal submit ───────────────────────────────────────────────────────────
+  if (interaction.isModalSubmit() && interaction.customId === 'confess_modal') {
+    const guildId = interaction.guildId;
+    const settings = getSettings(guildId);
+    const confessionText = interaction.fields.getTextInputValue('confession_text');
 
     await interaction.reply({
       content: '✅ Your confession has been posted anonymously!',
