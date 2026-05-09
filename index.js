@@ -1,3 +1,8 @@
+const http = require('http');
+http.createServer((req, res) => res.end('Bot is alive!')).listen(3000, () => {
+  console.log('⚡ Keep-alive server running on port 3000');
+});
+
 require('dotenv').config();
 const {
   Client,
