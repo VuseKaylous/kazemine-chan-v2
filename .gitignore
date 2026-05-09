@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NEVER commit this)
+.env
+
+# SQLite database (has live data, not source code)
+confessions.db
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
