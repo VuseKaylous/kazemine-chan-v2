@@ -64,7 +64,7 @@ function incrementCount(guildId) {
 const server = http.createServer(async (req, res) => {
 
   // Add CORS headers to every response
-  res.setHeader('Access-Control-Allow-Origin', 'https://your-project.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', 'https://kazemine-chan-v2.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
