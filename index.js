@@ -63,6 +63,17 @@ function incrementCount(guildId) {
 // ── HTTP server (website + webhook endpoint) ───────────────────────────────
 const server = http.createServer(async (req, res) => {
 
+  // Add CORS headers to every response
+  res.setHeader('Access-Control-Allow-Origin', 'https://your-project.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
+  }
+
   // Serve the confession website
   if (req.method === 'GET' && req.url === '/') {
     const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
